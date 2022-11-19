@@ -1,34 +1,10 @@
 import Game from '@/scripts/rules'
 import { createStore } from 'vuex'
-import { EMPTY_TERRAIN, TERRAIN, FORTRESS_1, FORTRESS_2, NO_PAWN, PAWN_1, PAWN_2 } from '@/scripts/consts'
+import game from '@/maps/chessence'
 
 export default createStore({
   state: {
-    game: new Game(
-      [
-        [FORTRESS_2, TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN],
-        [TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, EMPTY_TERRAIN],
-        [TERRAIN, TERRAIN, TERRAIN, TERRAIN, EMPTY_TERRAIN, TERRAIN],
-        [TERRAIN, TERRAIN, EMPTY_TERRAIN, TERRAIN, TERRAIN, TERRAIN],
-        [TERRAIN, EMPTY_TERRAIN, TERRAIN, TERRAIN, EMPTY_TERRAIN, TERRAIN],
-        [TERRAIN, TERRAIN, TERRAIN, EMPTY_TERRAIN, TERRAIN, TERRAIN],
-        [TERRAIN, EMPTY_TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN],
-        [EMPTY_TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN],
-        [TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, FORTRESS_1]
-      ],
-      [
-        [NO_PAWN, PAWN_2, NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN],
-        [PAWN_2, PAWN_2, PAWN_2, NO_PAWN, NO_PAWN, NO_PAWN],
-        [NO_PAWN, PAWN_2, PAWN_2, NO_PAWN, NO_PAWN, NO_PAWN],
-        [NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN],
-        [NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN],
-        [NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN],
-        [NO_PAWN, NO_PAWN, NO_PAWN, PAWN_1, PAWN_1, NO_PAWN],
-        [NO_PAWN, NO_PAWN, NO_PAWN, PAWN_1, PAWN_1, PAWN_1],
-        [NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN, PAWN_1, NO_PAWN]
-      ],
-      9
-    ),
+    game: new Game(game.map, game.board, game.pawnCount),
     round: 0
   },
   getters: {

@@ -1,9 +1,5 @@
 import { NOBODY, PLAYER_1, PLAYER_2, EMPTY_TERRAIN, TERRAIN, FORTRESS_1, FORTRESS_2, NO_PAWN, PAWN_1, PAWN_2 } from '@/scripts/consts'
 
-type Coordinates = [number, number]
-type PawnValue = 0 | 1 | -1
-type MapValue = 0 | 1 | 2 | 3
-
 export default class Game {
   map: MapValue[][]
   initialBoard: PawnValue[][]
