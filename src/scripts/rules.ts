@@ -8,7 +8,7 @@ export default class Game {
   map: MapValue[][]
   initialBoard: PawnValue[][]
   board: PawnValue[][]
-  reserve: [number, number]
+  reserve = [0, 0]
   scores = [0, 0]
   neededScore = [1, 1]
   round = 0
@@ -18,21 +18,17 @@ export default class Game {
     this.board = board.map(row => ([...row]))
     this.initialBoard = board.map(row => ([...row]))
 
-    this.neededScore = [
-      this.map.flat().filter(s => s === 2).length,
-      this.map.flat().filter(s => s === 3).length
-    ]
+    this.neededScore[PLAYER_1] = this.map.flat().filter(s => s === FORTRESS_1).length
+    this.neededScore[PLAYER_2] = this.map.flat().filter(s => s === FORTRESS_2).length
 
-    this.reserve = [
-      Math.max(0, pawnCount - board.flat().filter(c => c === 0).length),
-      Math.max(0, pawnCount - board.flat().filter(c => c === 1).length)
-    ]
+    this.reserve[PLAYER_1] = Math.max(0, pawnCount - board.flat().filter(c => c === PAWN_1).length)
+    this.reserve[PLAYER_2] = Math.max(0, pawnCount - board.flat().filter(c => c === PAWN_2).length)
   }
 
   getMapSquare (square: Coordinates, offset: [number, number] = [0, 0]): MapValue {
     const newSquare = [square[0] + offset[0], square[1] + offset[1]]
 
-    const isOnTheBoard = newSquare[0] >= 0 && newSquare[0] < 6 && newSquare[1] >= 0 && newSquare[1] < 9
+    const isOnTheBoard = newSquare[0] >= 0 && newSquare[0] < this.width && newSquare[1] >= 0 && newSquare[1] < this.height
     if (!isOnTheBoard) return 0
 
     return this.map[newSquare[1]][newSquare[0]]
@@ -41,14 +37,14 @@ export default class Game {
   getSquarePlayer (square: Coordinates, offset: [number, number] = [0, 0]): PawnValue {
     const newSquare = [square[0] + offset[0], square[1] + offset[1]]
 
-    const isOnTheBoard = newSquare[0] >= 0 && newSquare[0] < 6 && newSquare[1] >= 0 && newSquare[1] < 9
+    const isOnTheBoard = newSquare[0] >= 0 && newSquare[0] < this.width && newSquare[1] >= 0 && newSquare[1] < this.height
     if (!isOnTheBoard) return NO_PAWN
 
     return this.board[newSquare[1]][newSquare[0]]
   }
 
   wherePawnCanMove (pawn: Coordinates): Coordinates[] {
-    const isOnTheBoard = pawn[0] >= 0 && pawn[0] < 6 && pawn[1] >= 0 && pawn[1] < 9
+    const isOnTheBoard = pawn[0] >= 0 && pawn[0] < this.width && pawn[1] >= 0 && pawn[1] < this.height
     if (!isOnTheBoard) return [] // pawn have to be on the board
 
     const orthogonalOffsets = [[0, -1], [1, 0], [0, 1], [-1, 0]] as [number, number][]
@@ -66,7 +62,7 @@ export default class Game {
         let i = 1
         let pos: Coordinates = [pawn[0] + i * offset[0], pawn[1] + i * offset[1]]
         while (
-          this.getMapSquare(pos) === 1 && // blocked by invalid square
+          this.getMapSquare(pos) === TERRAIN && // blocked by invalid square
           this.getSquarePlayer(pos) === NO_PAWN // is not on another pawn
         ) {
           options.push(pos)
@@ -82,7 +78,7 @@ export default class Game {
         let i = 1
         let pos: Coordinates = [pawn[0] + i * offset[0], pawn[1] + i * offset[1]]
         while (
-          this.getMapSquare(pos) === 1 && // blocked by invalid square
+          this.getMapSquare(pos) === TERRAIN && // blocked by invalid square
           this.getSquarePlayer(pos) === NO_PAWN // is not on another pawn
         ) {
           options.push(pos)
@@ -102,7 +98,7 @@ export default class Game {
     return options.filter(option => {
       return [
         this.getSquarePlayer(option) !== this.currentPlayer,
-        this.getMapSquare(option) > 0,
+        this.getMapSquare(option) !== EMPTY_TERRAIN,
         this.getMapSquare(option) !== this.getSquarePlayer(pawn) + 2 // not on his own fortress
       ].every(c => c)
     })
@@ -125,11 +121,11 @@ export default class Game {
   }
 
   movePawn (pawn: Coordinates, to: Coordinates): boolean {
-    if (pawn[0] < 0 || pawn[0] > 5 || pawn[1] < 0 || pawn[1] > 8) return false // pawn have to be on the board
+    if (pawn[0] < 0 || pawn[0] >= this.width || pawn[1] < 0 || pawn[1] >= this.height) return false // pawn have to be on the board
     if (this.getSquarePlayer(pawn) !== this.currentPlayer) return false // pawn have to be owned by player
     if (!(this.wherePawnCanMove(pawn).findIndex(c => c[0] === to[0] && c[1] === to[1]) >= 0)) return false // destination has to be valid
 
-    this.board[pawn[1]][pawn[0]] = -1
+    this.board[pawn[1]][pawn[0]] = NOBODY
     this.board[to[1]][to[0]] = this.currentPlayer
     this.endRound()
     return true
@@ -148,5 +144,13 @@ export default class Game {
 
   get currentPlayer () {
     return this.round % 2 as 0 | 1
+  }
+
+  get width () {
+    return this.map[0].length
+  }
+
+  get height () {
+    return this.map.length
   }
 }
