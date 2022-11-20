@@ -3,7 +3,6 @@
 ## TODO
 
 - Multiplayer (socket.io)
-- More than two players
 - Map creation
 - Strategy mode : before the game you can place your fortress and soldiers
 - New game mechanics

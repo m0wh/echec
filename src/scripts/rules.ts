@@ -127,7 +127,8 @@ export default class Game {
         const fortressPlayer = square - 2 // the player who owns this fortress
         const pawnPlayer = this.board[rowIndex][colIndex] // the player who owns the pawn
 
-        if (fortressPlayer !== pawnPlayer) { // fortress is destroyed
+        /* fortress is destroyed */
+        if (fortressPlayer !== pawnPlayer) {
           /* a lot of game mechanics can be set here, for example
           - take control of fortress
           - own the spawn points near it
@@ -157,14 +158,23 @@ export default class Game {
           // }
         }
       })
+    })
 
-      for (let player = 0; player < this.playerCount; player++) {
-        if (this.fortressCount[player] === 0) { // a player died
+    for (let player = 0; player < this.playerCount; player++) {
+      if (player !== this.currentPlayer) {
+        const playerIsBlocked = this.board.every((row, rowIndex) => {
+          return row.every((square, colIndex) => {
+            if (square !== player) return true
+            return this.wherePawnCanMove([colIndex, rowIndex]).length === 0
+          })
+        })
+
+        if (this.fortressCount[player] === 0 || playerIsBlocked) { // a player died
           this.board = this.board.map(row => row.map(sq => sq === player ? NOBODY : sq)) // remove all of his pawns from board
           this.reserve[player] = 0 // empty his reserve
         }
       }
-    })
+    }
 
     if (this.activePlayers.length === 1) {
       this.winner = this.activePlayers[0]
