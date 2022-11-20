@@ -115,18 +115,16 @@ export default class EchecGame extends Vue.with(Props) {
       justify-content: center;
       margin: 0 #{$border-width / 2};
       height: $square-size * 0.75;
+      min-height: 50px;
 
       .reserve {
-        display: block;
+        min-width: 32px;
+        min-height: 32px;
         width: $square-size * 0.6;
         height: $square-size * 0.6;
-        border: none;
         margin: 0;
         padding: 0;
         background: none;
-        display: flex;
-        justify-content: center;
-        align-items: center;
         border-radius: 50%;
         border: $border-width solid $color-borders;
         margin: 0 $border-width / 2;
@@ -146,6 +144,7 @@ export default class EchecGame extends Vue.with(Props) {
 
     .board {
       border: #{$border-width / 2} solid $color-borders;
+      background-color: $color-borders;
 
       .row {
         height: $square-size;
@@ -158,11 +157,11 @@ export default class EchecGame extends Vue.with(Props) {
           width: calc(#{$square-size} - #{$border-width});
           height: calc(#{$square-size} - #{$border-width});
           background-color: $color-square1;
-          border: #{$border-width / 2} solid $color-borders;
+          margin: $border-width / 2;
 
           &.selected {
             border-color: $color-selection;
-            box-shadow: 0 0 0 #{$border-width / 2} $color-selection;
+            box-shadow: 0 0 0 calc(#{$border-width} + 1px) $color-selection;
             z-index: 1;
           }
 
