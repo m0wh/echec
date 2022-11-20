@@ -1,23 +1,19 @@
-import { EMPTY_TERRAIN, TERRAIN, FORTRESS_1, FORTRESS_2, NO_PAWN, PAWN_1, PAWN_2 } from '@/scripts/consts'
+const XX = 0 // empty square
+const __ = 1 // removed square
+const F1 = 2 // Fortress 1
+const P1 = 3 // Pawn 1
+const F2 = 4 // Fortress 2
+const P2 = 5 // Pawn 2
 
 export default {
   map: [
-    [EMPTY_TERRAIN, EMPTY_TERRAIN, TERRAIN, FORTRESS_2, TERRAIN, EMPTY_TERRAIN, EMPTY_TERRAIN],
-    [EMPTY_TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, EMPTY_TERRAIN],
-    [TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN],
-    [TERRAIN, TERRAIN, TERRAIN, EMPTY_TERRAIN, TERRAIN, TERRAIN, TERRAIN],
-    [TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN],
-    [EMPTY_TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, TERRAIN, EMPTY_TERRAIN],
-    [EMPTY_TERRAIN, EMPTY_TERRAIN, TERRAIN, FORTRESS_1, TERRAIN, EMPTY_TERRAIN, EMPTY_TERRAIN]
-  ] as MapValue[][],
-  board: [
-    [NO_PAWN, NO_PAWN, PAWN_2, NO_PAWN, PAWN_2, NO_PAWN, NO_PAWN],
-    [NO_PAWN, PAWN_2, NO_PAWN, NO_PAWN, NO_PAWN, PAWN_2, NO_PAWN],
-    [NO_PAWN, NO_PAWN, NO_PAWN, PAWN_1, NO_PAWN, NO_PAWN, NO_PAWN],
-    [NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN, NO_PAWN],
-    [NO_PAWN, NO_PAWN, NO_PAWN, PAWN_2, NO_PAWN, NO_PAWN, NO_PAWN],
-    [NO_PAWN, PAWN_1, NO_PAWN, NO_PAWN, NO_PAWN, PAWN_1, NO_PAWN],
-    [NO_PAWN, NO_PAWN, PAWN_1, NO_PAWN, PAWN_1, NO_PAWN, NO_PAWN]
-  ] as PawnValue[][],
-  pawnCount: 8
+    [XX, XX, P2, F2, P2, XX, XX],
+    [XX, P2, __, __, __, P2, XX],
+    [__, __, __, P1, __, __, __],
+    [__, __, __, XX, __, __, __],
+    [__, __, __, P2, __, __, __],
+    [XX, P1, __, __, __, P1, XX],
+    [XX, XX, P1, F1, P1, XX, XX]
+  ] as number[][],
+  pawnCount: [8, 8]
 }

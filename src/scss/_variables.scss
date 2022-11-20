@@ -6,6 +6,16 @@ $color-square2: #EFC56E;
 $color-player1: #7CA6BB;
 $color-player2: #D04D2C;
 $color-selection: #FFFFFF;
+$player-colors: (
+  1 #7CA6BB,
+  2 #D04D2C,
+  3 #30AC5B,
+  4 #e1cf08,
+  5 #df97d1,
+  6 #ee7e2e,
+  7 #6b68a9,
+  8 #dcdac8,
+);
 
 $border-width: 6px;
 $square-size: 9vmin;

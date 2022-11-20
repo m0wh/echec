@@ -1,27 +1,45 @@
-import { NOBODY, PLAYER_1, PLAYER_2, EMPTY_TERRAIN, TERRAIN, FORTRESS_1, FORTRESS_2, NO_PAWN, PAWN_1, PAWN_2 } from '@/scripts/consts'
+import { NOBODY, EMPTY_TERRAIN, TERRAIN, NO_PAWN } from '@/scripts/consts'
 
 export default class Game {
-  map: MapValue[][]
-  initialBoard: PawnValue[][]
-  board: PawnValue[][]
-  reserve = [0, 0]
-  scores = [0, 0]
-  neededScore = [1, 1]
-  round = 0
+  map: number[][] // terrain and fortresses
+  initialBoard: number[][] // to know where the pawns can spawn
+  board: number[][] // pawn positions
+  playerCount: number // number of players in the game
+  reserve: number[] = [] // reserve pawns of each player
+  fortressCount: number[] = [] // number of fortresses of each player
+  round = 0 // current round (counting dead players rounds)
+  playedRounds = 0 // count of played rounds
+  winner?: number = undefined
 
-  constructor (map: MapValue[][], board: PawnValue[][], pawnCount: number) {
-    this.map = map.map(row => ([...row]))
-    this.board = board.map(row => ([...row]))
-    this.initialBoard = board.map(row => ([...row]))
+  constructor (map: number[][], pawnCount: number[]) {
+    this.playerCount = (Math.max(...map.flat()) - 1) / 2
 
-    this.neededScore[PLAYER_1] = this.map.flat().filter(s => s === FORTRESS_1).length
-    this.neededScore[PLAYER_2] = this.map.flat().filter(s => s === FORTRESS_2).length
+    this.map = map.map(row => {
+      return row.map(square => {
+        if (square === 0) return 0 // is a removed square
+        if (square % 2 === 0) return square / 2 + 1 // is a fortress
+        return 1 // else, is a normal square
+      })
+    })
 
-    this.reserve[PLAYER_1] = Math.max(0, pawnCount - board.flat().filter(c => c === PAWN_1).length)
-    this.reserve[PLAYER_2] = Math.max(0, pawnCount - board.flat().filter(c => c === PAWN_2).length)
+    this.board = map.map(row => {
+      return row.map(square => {
+        if (square % 2 === 1) return (square - 1) / 2 - 1 // is a pawn
+        return -1
+      })
+    })
+    this.initialBoard = this.board.map(row => ([...row]))
+
+    for (let playerIndex = 0; playerIndex < this.playerCount; playerIndex++) {
+      const fortressCode = playerIndex + 2
+      const pawnCode = playerIndex
+
+      this.fortressCount[playerIndex] = this.map.flat().filter(s => s === fortressCode).length
+      this.reserve[playerIndex] = Math.max(0, pawnCount[playerIndex] - this.board.flat().filter(c => c === pawnCode).length)
+    }
   }
 
-  getMapSquare (square: Coordinates, offset: [number, number] = [0, 0]): MapValue {
+  getMapSquare (square: Coordinates, offset: [number, number] = [0, 0]): number {
     const newSquare = [square[0] + offset[0], square[1] + offset[1]]
 
     const isOnTheBoard = newSquare[0] >= 0 && newSquare[0] < this.width && newSquare[1] >= 0 && newSquare[1] < this.height
@@ -30,7 +48,7 @@ export default class Game {
     return this.map[newSquare[1]][newSquare[0]]
   }
 
-  getSquarePlayer (square: Coordinates, offset: [number, number] = [0, 0]): PawnValue {
+  getSquarePlayer (square: Coordinates, offset: [number, number] = [0, 0]): number {
     const newSquare = [square[0] + offset[0], square[1] + offset[1]]
 
     const isOnTheBoard = newSquare[0] >= 0 && newSquare[0] < this.width && newSquare[1] >= 0 && newSquare[1] < this.height
@@ -101,19 +119,65 @@ export default class Game {
   }
 
   endRound (): void {
-    this.map.flat().forEach((square, i) => {
-      const player1Fortress = square === FORTRESS_1
-      const player2Fortress = square === FORTRESS_2
-      const player1Pawn = this.board.flat()[i] === PLAYER_1
-      const player2Pawn = this.board.flat()[i] === PLAYER_2
-      if (player2Fortress && player1Pawn) this.scores[PLAYER_1]++ // point for Player 1
-      if (player1Fortress && player2Pawn) this.scores[PLAYER_2]++ // point for Player 2
+    this.map.forEach((row, rowIndex) => { // check each square
+      row.forEach((square, colIndex) => {
+        if (square === EMPTY_TERRAIN || square === TERRAIN) return // if not a fortress we don't care
+        if (this.board[rowIndex][colIndex] === NOBODY) return // no one on this square
+
+        const fortressPlayer = square - 2 // the player who owns this fortress
+        const pawnPlayer = this.board[rowIndex][colIndex] // the player who owns the pawn
+
+        if (fortressPlayer !== pawnPlayer) { // fortress is destroyed
+          /* a lot of game mechanics can be set here, for example
+          - take control of fortress
+          - own the spawn points near it
+          - put pawn in reserve */
+
+          /* fortress is replaced by a removed square */
+          // this.map[rowIndex][colIndex] = EMPTY_TERRAIN // remove fortress
+          // this.fortressCount[fortressPlayer]--
+
+          /* fortress is replaced by a normal square */
+          this.map[rowIndex][colIndex] = TERRAIN // remove fortress
+          this.fortressCount[fortressPlayer]--
+
+          /* fortress is captured by attacker */
+          // this.map[rowIndex][colIndex] = pawnPlayer + 2 // capture the fortress
+
+          /* attacker goes back to reserve */
+          // this.board[rowIndex][colIndex] = NOBODY // remove pawn from board
+          // this.reserve[pawnPlayer]++ // add pawn to reserve
+
+          /* attacker dies */
+          // this.board[rowIndex][colIndex] = NOBODY // remove pawn from board
+
+          /* attacker converts loser pawns */
+          // if (this.fortressCount[fortressPlayer] === 0) { // a player died
+          //   this.board = this.board.map(row => row.map(sq => sq === fortressPlayer ? pawnPlayer : sq))
+          // }
+        }
+      })
+
+      for (let player = 0; player < this.playerCount; player++) {
+        if (this.fortressCount[player] === 0) { // a player died
+          this.board = this.board.map(row => row.map(sq => sq === player ? NOBODY : sq)) // remove all of his pawns from board
+          this.reserve[player] = 0 // empty his reserve
+        }
+      }
     })
 
-    let winner = NOBODY
-    if (this.scores[PLAYER_1] >= this.neededScore[PLAYER_1]) winner = PLAYER_1
-    if (this.scores[PLAYER_2] >= this.neededScore[PLAYER_2]) winner = PLAYER_2
-    if (winner < 0) this.round++
+    if (this.activePlayers.length === 1) {
+      this.winner = this.activePlayers[0]
+      return // we have a winner
+    }
+
+    if (this.activePlayers.length === 0) {
+      this.winner = this.activePlayers[0]
+      return // everybody died, this is to prevent from infinite loop, just in case
+    }
+
+    do { this.round++ } while (!this.board.flat().includes(this.currentPlayer))
+    this.playedRounds++
   }
 
   movePawn (pawn: Coordinates, to: Coordinates): boolean {
@@ -139,7 +203,11 @@ export default class Game {
   }
 
   get currentPlayer () {
-    return this.round % 2 as 0 | 1
+    return this.round % this.playerCount
+  }
+
+  get activePlayers () {
+    return [...new Set(this.board.flat().filter(s => s !== NOBODY))]
   }
 
   get width () {
